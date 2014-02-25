@@ -19,14 +19,33 @@ public class Controller {
 
     private static final Logger logger = getLogger("Controller");
     private static CouchWriter writer;
-    private static final String mode = "SYNC";
+    private static int mode;
+    private static int threads;
 
     public Controller() {
     }
 
     public static void main(String[] args) throws IOException {
 
-        Integer count = 1;
+        // Check how many arguments were passed in
+        if(args.length == 0)
+        {
+            System.out.println("Proper Usage is: java Controller SYNC/ASYNC NoOfThreads");
+            System.exit(0);
+        }
+
+        if (args[0] == null){
+            mode = 1; //sync
+        } else {
+            mode = Integer.parseInt(args[0]);
+        }
+
+        if (args[1] == null){
+            threads = 1;
+        } else {
+            threads = Integer.parseInt(args[1]);
+        }
+
         logger.info("Firing up...");
 
         //DBCollection productCollection = getCollection(getTempCollectionName(PRODUCT_COLLECTION));
@@ -50,47 +69,26 @@ public class Controller {
         }
 
         logger.info("Ingestion starting - Creating threads");
+        logger.info("mode " + mode + " " + threads);
 
         //Date d = new Date();
-        if (mode == "SYNC")  {
-            while (count < 21) {
-                   new Thread(new CouchWriter(CBClient,count.toString())).start();
-                   count++;
+        if (mode == 1)  {
+            for (int i = 0; i < threads; i++) {
+                   logger.info("Thread " + i + " started");
+                   new Thread(new CouchWriter(CBClient,i,threads)).start();
             }
-        } else {
+        } else {  //async (mode 2)
 
-            while (count < 11) {
-                new Thread(new CouchWriterAsync(CBClient,count.toString())).start();
-                count++;
+            for (int i = 0; i < threads; i++) {
+                new Thread(new CouchWriterAsync(CBClient,i)).start();
             }
         }
         //Date d2 = new Date();
         //Long compare = (d2.getTime() - d.getTime()) / 1000;  //get seconds
         //logger.info("Total Ingestion complete, time elapsed: " + compare.toString() + " s");
-        /*
-        Controller controller = new Controller(productCollection, pimHierarchyCollection,
-                commercialHierarchyCollection,
-                Configuration.getRmsDataPath(),
-                Configuration.getRmsEanDataPath(),
-                Configuration.getPimHierarchyDataPath(),
-                Configuration.getPimUdaDataPath(),
-                Configuration.getPimItemDataPath(),
-                Configuration.getPimAttachmentDataPath(),
-                Configuration.getPimISBNDataPath(),
-                Configuration.getSonettoDataPath(),
-                Configuration.getSonettoExtraDataPath(),
-                Configuration.getCommercialHierarchyDivisionDataPath(),
-                Configuration.getCommercialHierarchyGroupDataPath(),
-                Configuration.getCommercialHierarchyDepartmentDataPath(),
-                Configuration.getCommercialHierarchyClassDataPath(),
-                Configuration.getCommercialHierarchySubclassDataPath(),
-                Configuration.getFeatureToggles());
-                */
 
-       // ControllerCoordination controllerCoordination = new ControllerCoordination(controller);
-       // controllerCoordination.processData();
 
-        //Shutdown connection and stop process
+        //Shutdown connection and stop process  TODO: Check threads complete
         //CBClient.shutdown();
     }
 }

@@ -17,8 +17,12 @@ dependencies {
 }
 
 mainClassName = 'com.tesco.adapter.core.Controller'
+args =
 
 run {
     //systemProperties 'environment': System.getProperty("environment");
     //systemProperties 'logback.configurationFile': 'src/main/resources/logback.groovy'
+    if (project.hasProperty('myargs')) {
+        args(myargs.split(','))
+    }
 }

@@ -27,10 +27,10 @@ public class CouchWriterAsync implements Runnable{
         private final String thread;
         private ObjectMapper mapper = new ObjectMapper(); // can reuse, share globally
 
-        public CouchWriterAsync(CouchbaseClient CBClient, String threadNumber){
+        public CouchWriterAsync(CouchbaseClient CBClient, int threadNumber){
             this.JSONdata = "";
             this.client = CBClient;
-            this.thread = threadNumber;
+            this.thread = Integer.toString(threadNumber);
         }
 
         public void run(){
